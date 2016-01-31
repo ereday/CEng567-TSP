@@ -1,0 +1,311 @@
+% Template LaTeX source file for homework problem solutions.
+% Alan T. Sherman (9/9/98)
+
+% Running LaTeX
+%
+% Name this file FOO.tex
+% latex FOO
+% latex FOO   
+%    (You have to run latex twice to get the cross references correct.
+%     Running latex creates a file FOO.dvi 
+%     You can view dvi files with the program xdvi )
+% xdvi FOO.dvi &
+%
+% lpr -d FOO.dvi
+%    (To print the dvi file.   Be sure to use the "-d" print option,
+%     and be sure your printer can handle dvi files (not all printers can).
+%     Do NOT print with "lpr FOO.dvi", which will print tens of pages
+%     of unreadable dvi source code. Printing a postscript (ps) file
+%     is usually more reliable, as explained below.)
+%
+% dvips FOO.dvi
+%    (To create a postscript file named FOO.ps 
+%     which you can view with the program ghostview )
+% ghostview FOO.ps &
+% lpr FOO.ps
+%    (To print the ps file.)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{listings}
+
+% Set the margins
+%
+\setlength{\textheight}{8.5in}
+\setlength{\headheight}{.25in}
+\setlength{\headsep}{.25in}
+\setlength{\topmargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Macros
+
+% Math Macros.  It would be better to use the AMS LaTeX package,
+% including the Bbb fonts, but I'm showing how to get by with the most
+% primitive version of LaTeX.  I follow the naming convention to begin
+% user-defined macro and variable names with the prefix "my" to make it
+% easier to distiguish user-defined macros from LaTeX commands.
+%
+\newcommand{\myN}{\hbox{N\hspace*{-.9em}I\hspace*{.4em}}}
+\newcommand{\myZ}{\hbox{Z}^+}
+\newcommand{\myR}{\hbox{R}}
+
+\newcommand{\myfunction}[3]
+{${#1} : {#2} \rightarrow {#3}$ }
+
+\newcommand{\myzrfunction}[1]
+{\myfunction{#1}{{\myZ}}{{\myR}}}
+
+
+% Formating Macros
+%
+
+\newcommand{\myheader}[4]
+{\vspace*{-0.5in}
+\noindent
+{#1} \hfill {#3}
+
+\noindent
+{#2} \hfill {#4}
+
+\noindent
+\rule[8pt]{\textwidth}{1pt}
+
+\vspace{1ex} 
+}  % end \myheader 
+
+\newcommand{\myalgsheader}[0]
+{\myheader{METU, Computer Engineering}
+{CENG567 - Design and Analysis of Algorithms \\ Homework 3 - Pseudocodes \\ {\bf Erenay DAYANIK}  - 1819192 } {Fall 2015}{}}
+
+% Running head (goes at top of each page, beginning with page 2.
+% Must precede by \pagestyle{myheadings}.
+\newcommand{\myrunninghead}[2]
+{\markright{{\it {#1}, {#2}}}}
+
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+%%%%%% Begin document with header and title %%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+\newenvironment{breakablealgorithm}
+  {% \begin{breakablealgorithm}
+   \begin{center}
+     \refstepcounter{algorithm}% New algorithm
+     \hrule height.8pt depth0pt \kern2pt% \@fs@pre for \@fs@ruled
+     \renewcommand{\caption}[2][\relax]{% Make a new \caption
+       {\raggedright\textbf{\ALG@name~\thealgorithm} ##2\par}%
+       \ifx\relax##1\relax % #1 is \relax
+         \addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##2}%
+       \else % #1 is not \relax
+         \addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##1}%
+       \fi
+       \kern2pt\hrule\kern2pt
+     }
+  }{% \end{breakablealgorithm}
+     \kern2pt\hrule\relax% \@fs@post for \@fs@ruled
+   \end{center}
+  }
+\makeatother
+\begin{document}
+
+\myalgsheader
+\pagenumbering{gobble}
+\pagestyle{plain}
+\section{Backtracking}
+\begin{breakablealgorithm}
+  \caption{Algorithm for "Travelling Salesman Problem" using backtracking method [1]}
+  \begin{algorithmic}[1]
+    \State $//$ converts arg1 to reduced matrix
+    \Procedure{REDUCE}{$arg1$}
+  
+    \State \textbf{Input:} $arg1$
+    \State \textbf{Output:} $value$
+    \\
+    \State $m \gets arg1$.size();
+    \State $value \gets  $ 0;
+    \For{each $i\in [0,m-1]$}
+      \State $min \gets   arg1$[$i,0];$
+       \For{each $j\in [1,m-1]$}
+	  \If{arg1$[$i,$j]>min$}
+	  	 \State $min \gets arg1$[$i,j];$
+	  \EndIf
+	\EndFor	
+	\For{each $j\in [0,m-1]$}
+		\State arg1$[$i,$j] \gets  arg1$[$i,$j]- $min;$
+	\EndFor
+	\State $value \gets value$ + $min;$
+    \EndFor
+    \For{each $j\in [0,m-1]$}
+	\State $min \gets arg1$[$ 0,j];$
+	\For{each $i\in [1,m-1]$}
+	 \If{arg1$[$i,$j]>min$}
+	  	 \State $min \gets arg1$[$i,j];$
+	  \EndIf	
+	\EndFor
+	\For{each $i\in [0,m-1]$}
+		\State arg1$[$i,$j] \gets  arg1$[$i,$j]- $min;$
+	\EndFor
+	 \State $value \gets value$ + $min;$
+    \EndFor
+  \State \Return value
+
+    \EndProcedure
+    \State $//$ computes boundary function
+    \Procedure{REDUCEBOUND}{$partialSolution$}
+	 \State \textbf{Input:} $partialSolution$
+	 \State \textbf{Output:} $ans$
+		 \State \textbf{GlobalVariables:} $costMatrix$,$V$
+	 \State $//$ $V$: all vertices in the graph
+	 \State $//$ $M$: cost matrix stores weight of each edge in the graph
+	 \State $//$ $partialSolution: [x_{0},x_{1},...,x_{m-1}]$
+	 \If{$m=V$.size()}
+		 \State \Return (COST($partialSolution);$
+	 \EndIf
+	\State $M^\prime[0][0] \gets  \infty;$
+ 	
+	\For{each $y\in ${V$  \setminus   partialSolution$}}
+		\State $M^\prime[0][j] \gets  {costMatrix[x_{m-1}][y]};$
+		\State $j \gets j$ + $1;$
+	\EndFor
+	\State $i \gets 1;$
+	\For{each $x\in ${V$  \setminus   partialSolution$}}
+		\State $M^\prime[i][0] \gets  {costMatrix[x][x_{0}]};$
+		\State $i \gets i$ + $1;$
+	\EndFor
+	\State $i \gets 1;$
+	\For{each $x\in ${V$  \setminus   partialSolution$}}
+		\State $j \gets 1;$
+		\For{each $y\in ${V$  \setminus   partialSolution$}}
+			\State $M^\prime[i][j] \gets  {costMatrix[x][y]};$
+			\State $j \gets j$ + $1;$
+		\EndFor
+		\State $i \gets i$ + $1;$
+	\EndFor
+	\State $ans \gets REDUCE$($M^\prime);$
+
+	
+	    \For{$i=1$; $i<m$-1; $i++$ }
+		      \State $ans \gets ans$ + costMatrix$[x_{i-1}][x_{i}];$
+		  
+	    \EndFor
+		
+	 \State \Return ans
+  	 \EndProcedure	
+	\\
+	\\
+	\\
+	\\
+	\\
+	\\
+	\Procedure{BACKTRACKING}{$level$,$partialSolution$}
+	 \State \textbf{Input:} $level$,$partialSolution$
+	\State $//$ $partialSolution$: $[x_{0},x_{1},...,x_{level-1}];$
+	 \State \textbf{Output:} $OptX$,$OptC$
+		 \State \textbf{GlobalVariables:} $C_{level}$ ($level$=0,1,2,...,n-1)
+	 \State $//$ $C_{level}$: choice set for that level   
+	\State $//$ $n$: number of nodes in the graph
+	 \If{$level=n$}
+		\State $C \gets  {COST(partialSolution)};$
+		 \If{$C<OptC$}
+			\State $OptC \gets  {C};$
+			\State $OptX \gets  {partialSolution};$
+		 \EndIf
+	 \EndIf
+
+	\If{$level=0$}
+		\State$C_{level} \gets  {\{0\}};$
+  	  	
+	\ElsIf{$level=1$}
+		\State$C_{level} \gets  {\{1,2,3,....,n-1\}};$
+  	\Else  	 
+		\State$C_{level} \gets  {C_{level-1} \setminus \{x_{level-1}\}};$
+	\EndIf 
+ 
+          \State$B \gets  {REDUCEBOUND(partialSolution)};$
+          \For{each $x\in    C_{level}$}
+		 \If{$B>=OptC$}
+			\State \Return 
+		 \EndIf
+                   \State$x_{level} \gets  {x};$
+		 \State $BACKTRACKING(level+1,partialSolution);$
+	\EndFor
+    \EndProcedure
+  \end{algorithmic}
+\end{breakablealgorithm}
+
+\newpage
+\section{Branch \& Bound}
+\begin{breakablealgorithm}
+  \caption{Algorithm for "Travelling Salesman Problem" using branch \& bound method [1]}
+  \begin{algorithmic}[1]
+   
+    \Procedure{BRANCHandBOUND}{$level$,$partialSolution$}
+	 \State \textbf{Input:} $level$,$partialSolution$
+	\State $//$ $partialSolution$: $[x_{0},x_{1},...,x_{level-1}];$
+	 \State \textbf{Output:} $OptX$,$OptC$
+		 \State \textbf{GlobalVariables:} $C_{level}$ ($level$=0,1,2,...,n-1)
+	 \State $//$ $C_{level}$: choice set for that level   
+	\State $//$ $n$: number of nodes in the graph
+	 \If{$level=n$}
+		\State $C \gets  {COST(partialSolution)};$
+		 \If{$C<OptC$}
+			\State $OptC \gets  {C};$
+			\State $OptX \gets  {partialSolution};$
+		 \EndIf
+	 \EndIf
+
+	\If{$level=0$}
+		\State$C_{level} \gets  {\{0\}};$
+  	  	
+	\ElsIf{$level=1$}
+		\State$C_{level} \gets  {\{1,2,3,....,n-1\}};$
+  	\Else  	 
+		\State$C_{level} \gets  {C_{level-1} \setminus \{x_{level-1}\}};$
+	\EndIf 
+\State $count  \gets  {0};$
+\For{each $x\in    C_{level}$}
+                   \State$x_{level} \gets  {x};$
+		 \State $nextchoice[count] \gets  {x};$
+		\State $nextbound[count] \gets  {REDUCEBOUND(partialSolution)};$
+		\State $count  \gets  {count+1};$
+\EndFor
+
+\State $//$ Sort nextchoice and nextbound so that nextbound is an increasing order 
+\State $SORT(nextchoice,nextbound);$
+
+   \For{$i=1$; $i<count$-1; $i++$ }
+	\If{$nextbound[i]>=OptC$}
+		\State \Return 
+	  \EndIf 
+		\State$x_{level} \gets  {nextchoice[i]};$	
+		\State $BRANCHandBOUND(level+1,partialSolution);$
+	    \EndFor
+ \EndProcedure
+  \end{algorithmic}
+\end{breakablealgorithm}
+
+
+\newpage
+\begin {thebibliography}{9}
+
+\bibitem{citation1}
+  Donald L. Kreher , Douglas R. Stinson.
+  \emph{Combinatorial Algorithms},
+  CRC Press, New York,
+  2nd edition,
+  1999.
+
+\end{thebibliography}
+\end{document}
+
+
+
